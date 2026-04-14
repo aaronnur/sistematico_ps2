@@ -1,0 +1,35 @@
+### GET all vagas
+GET http://localhost:8080/api/vagas
+
+### GET vaga by id
+GET http://localhost:8080/api/vagas/1
+
+### GET vagas by empresa
+GET http://localhost:8080/api/vagas/empresa/1
+
+### POST create vaga
+POST http://localhost:8080/api/vagas
+Content-Type: application/json
+
+{
+  "titulo": "Estágio em Desenvolvimento",
+  "descricao": "Vaga para estudantes de TI com conhecimentos em Java",
+  "publicacao": "2025-10-10",
+  "ativo": true,
+  "idEmpresa": 3
+}
+
+### PUT update vaga
+PUT http://localhost:8080/api/vagas/1
+Content-Type: application/json
+
+{
+  "titulo": "Desenvolvedor Java Sênior",
+  "descricao": "Atuação em projetos backend com Java e Spring. Experiência avançada em APIs REST.",
+  "publicacao": "2025-10-01",
+  "ativo": true,
+  "idEmpresa": 1
+}
+
+### DELETE vaga
+DELETE http://localhost:8080/api/vagas/8

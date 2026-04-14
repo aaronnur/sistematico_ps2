@@ -13,10 +13,10 @@
     </parent>
     
     <groupId>com.example</groupId>
-    <artifactId>empresas-estudantes-vagas</artifactId>
+    <artifactId>gestao-empregos</artifactId>
     <version>1.0.0</version>
-    <name>empresas-estudantes-vagas</name>
-    <description>Web Service REST para gerenciamento de Empresas, Estudantes e Vagas</description>
+    <name>gestao-empregos</name>
+    <description>Web Service REST para gerenciar empresas, estudantes e vagas</description>
     
     <properties>
         <java.version>17</java.version>

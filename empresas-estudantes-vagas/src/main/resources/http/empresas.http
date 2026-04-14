@@ -1,0 +1,28 @@
+### GET all empresas
+GET http://localhost:8080/api/empresas
+
+### GET empresa by id
+GET http://localhost:8080/api/empresas/1
+
+### POST create empresa
+POST http://localhost:8080/api/empresas
+Content-Type: application/json
+
+{
+  "nome": "Nova Empresa Tech",
+  "cnpj": "99.888.777/0001-66",
+  "emailContato": "contato@novatech.com"
+}
+
+### PUT update empresa
+PUT http://localhost:8080/api/empresas/1
+Content-Type: application/json
+
+{
+  "nome": "Empresa Alfa Atualizada",
+  "cnpj": "12.345.678/0001-90",
+  "emailContato": "novo.contato@empresa-alfa.com"
+}
+
+### DELETE empresa
+DELETE http://localhost:8080/api/empresas/6
