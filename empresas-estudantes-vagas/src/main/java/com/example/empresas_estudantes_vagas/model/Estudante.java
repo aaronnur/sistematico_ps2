@@ -1,4 +1,4 @@
-package com.example.gestaoempregos.model;
+package com.example.empresas_estudantes_vagas.model;
 
 import java.time.LocalDate;
 

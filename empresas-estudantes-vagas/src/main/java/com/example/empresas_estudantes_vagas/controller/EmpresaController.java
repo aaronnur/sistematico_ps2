@@ -1,6 +1,6 @@
-package com.example.gestaoempregos.controller;
+package com.example.empresas_estudantes_vagas.controller;
 
-import com.example.gestaoempregos.model.Empresa;
+import com.example.empresas_estudantes_vagas.model.Empresa;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,6 @@ public class EmpresaController {
     private Long nextId = 6L;
     
     public EmpresaController() {
-        // Dados iniciais
         empresas.add(new Empresa(1L, "Empresa Alfa LTDA", "12.345.678/0001-90", "contato@empresa-alfa.com"));
         empresas.add(new Empresa(2L, "Beta Comércio ME", "98.765.432/0001-10", "beta@comercio.com"));
         empresas.add(new Empresa(3L, "Gamma Serviços S.A.", "11.222.333/0001-44", "servicos@gamma.com"));
@@ -35,9 +34,7 @@ public class EmpresaController {
         Optional<Empresa> empresa = empresas.stream()
                 .filter(e -> e.getId().equals(id))
                 .findFirst();
-        
-        return empresa.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return empresa.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
@@ -60,18 +57,12 @@ public class EmpresaController {
             empresa.setEmailContato(empresaAtualizada.getEmailContato());
             return ResponseEntity.ok(empresa);
         }
-        
         return ResponseEntity.notFound().build();
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         boolean removed = empresas.removeIf(e -> e.getId().equals(id));
-        
-        if (removed) {
-            return ResponseEntity.noContent().build();
-        }
-        
-        return ResponseEntity.notFound().build();
+        return removed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

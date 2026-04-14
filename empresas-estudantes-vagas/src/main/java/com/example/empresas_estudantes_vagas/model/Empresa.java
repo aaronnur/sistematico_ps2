@@ -1,4 +1,4 @@
-package com.example.empresasestudantesvagas.model;
+package com.example.empresas_estudantes_vagas.model;
 
 public class Empresa {
     private Long id;

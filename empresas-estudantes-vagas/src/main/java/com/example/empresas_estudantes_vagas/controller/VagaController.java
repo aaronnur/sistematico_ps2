@@ -1,6 +1,6 @@
-package com.example.gestaoempregos.controller;
+package com.example.empresas_estudantes_vagas.controller;
 
-import com.example.gestaoempregos.model.Vaga;
+import com.example.empresas_estudantes_vagas.model.Vaga;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,6 @@ public class VagaController {
     private Long nextId = 8L;
     
     public VagaController() {
-        // Dados iniciais
         vagas.add(new Vaga(1L, "Desenvolvedor Java", "Atuação em projetos backend com Java e Spring. Experiência desejada em APIs REST.", LocalDate.parse("2025-10-01"), true, 1L));
         vagas.add(new Vaga(2L, "Analista de Suporte Técnico", "Suporte a clientes, resolução de chamados e participação em treinamentos internos.", LocalDate.parse("2025-09-27"), true, 2L));
         vagas.add(new Vaga(3L, "Engenheiro de Software", "Desenvolvimento de soluções para sistemas corporativos, integração e automação.", LocalDate.parse("2025-10-03"), false, 3L));
@@ -38,9 +37,7 @@ public class VagaController {
         Optional<Vaga> vaga = vagas.stream()
                 .filter(v -> v.getId().equals(id))
                 .findFirst();
-        
-        return vaga.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return vaga.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
     
     @GetMapping("/empresa/{idEmpresa}")
@@ -72,18 +69,12 @@ public class VagaController {
             vaga.setIdEmpresa(vagaAtualizada.getIdEmpresa());
             return ResponseEntity.ok(vaga);
         }
-        
         return ResponseEntity.notFound().build();
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         boolean removed = vagas.removeIf(v -> v.getId().equals(id));
-        
-        if (removed) {
-            return ResponseEntity.noContent().build();
-        }
-        
-        return ResponseEntity.notFound().build();
+        return removed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

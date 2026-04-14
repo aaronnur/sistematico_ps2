@@ -1,6 +1,6 @@
-package com.example.gestaoempregos.controller;
+package com.example.empresas_estudantes_vagas.controller;
 
-import com.example.gestaoempregos.model.Estudante;
+import com.example.empresas_estudantes_vagas.model.Estudante;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,6 @@ public class EstudanteController {
     private Long nextId = 11L;
     
     public EstudanteController() {
-        // Dados iniciais
         estudantes.add(new Estudante(1L, "Ana Paula Souza", "ana.souza@email.com", LocalDate.parse("2002-03-15"), 2020));
         estudantes.add(new Estudante(2L, "Carlos Henrique Lima", "carlos.lima@email.com", LocalDate.parse("2001-10-22"), 2019));
         estudantes.add(new Estudante(3L, "Fernanda Oliveira", "fernanda.oliveira@email.com", LocalDate.parse("2003-07-05"), 2021));
@@ -41,9 +40,7 @@ public class EstudanteController {
         Optional<Estudante> estudante = estudantes.stream()
                 .filter(e -> e.getId().equals(id))
                 .findFirst();
-        
-        return estudante.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return estudante.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
@@ -67,18 +64,12 @@ public class EstudanteController {
             estudante.setAnoIngresso(estudanteAtualizado.getAnoIngresso());
             return ResponseEntity.ok(estudante);
         }
-        
         return ResponseEntity.notFound().build();
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         boolean removed = estudantes.removeIf(e -> e.getId().equals(id));
-        
-        if (removed) {
-            return ResponseEntity.noContent().build();
-        }
-        
-        return ResponseEntity.notFound().build();
+        return removed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }
