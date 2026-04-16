@@ -1,4 +1,4 @@
-package com.example.empresasestudantesvagas.model;
+package com.example.empresas_estudantes_vagas.model;
 
 import jakarta.persistence.*;
 
@@ -35,28 +35,20 @@ public class Estudante {
         this.semestre = semestre;
     }
     
-    // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-    
     public String getCpf() { return cpf; }
     public void setCpf(String cpf) { this.cpf = cpf; }
-    
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
-    
     public String getCurso() { return curso; }
     public void setCurso(String curso) { this.curso = curso; }
-    
     public String getInstituicao() { return instituicao; }
     public void setInstituicao(String instituicao) { this.instituicao = instituicao; }
-    
     public Integer getSemestre() { return semestre; }
     public void setSemestre(Integer semestre) { this.semestre = semestre; }
 }

@@ -1,14 +1,11 @@
-package com.example.empresasestudantesvagas.repository;
+package com.example.empresas_estudantes_vagas.repository;
 
-import com.example.empresasestudantesvagas.model.Estudante;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import java.util.List;
+import com.example.empresas_estudantes_vagas.model.Estudante;
+import org.springframework.data.repository.CrudRepository;
 import java.util.Optional;
 
-@Repository
-public interface EstudanteRepo extends JpaRepository<Estudante, Long> {
+public interface EstudanteRepo extends CrudRepository<Estudante, Long> {
     Optional<Estudante> findByCpf(String cpf);
-    List<Estudante> findByCurso(String curso);
-    List<Estudante> findByInstituicao(String instituicao);
+    Iterable<Estudante> findByCurso(String curso);
+    Iterable<Estudante> findByInstituicao(String instituicao);
 }

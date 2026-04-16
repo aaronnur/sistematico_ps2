@@ -1,12 +1,7 @@
-package com.example.empresasestudantesvagas.repository;
+package com.example.empresas_estudantes_vagas.repository;
 
-import com.example.empresasestudantesvagas.model.Empresa;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import java.util.Optional;
+import com.example.empresas_estudantes_vagas.model.Empresa;
+import org.springframework.data.repository.CrudRepository;
 
-@Repository
-public interface EmpresaRepo extends JpaRepository<Empresa, Long> {
-    Optional<Empresa> findByCnpj(String cnpj);
-    Optional<Empresa> findByNome(String nome);
+public interface EmpresaRepo extends CrudRepository<Empresa, Long> {
 }

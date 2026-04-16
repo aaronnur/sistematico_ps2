@@ -1,14 +1,13 @@
-package com.example.empresasestudantesvagas.controller;
+package com.example.empresas_estudantes_vagas.controller;
 
-import com.example.empresasestudantesvagas.model.Vaga;
-import com.example.empresasestudantesvagas.model.Empresa;
-import com.example.empresasestudantesvagas.repository.VagaRepo;
-import com.example.empresasestudantesvagas.repository.EmpresaRepo;
+import com.example.empresas_estudantes_vagas.model.Vaga;
+import com.example.empresas_estudantes_vagas.model.Empresa;
+import com.example.empresas_estudantes_vagas.repository.VagaRepo;
+import com.example.empresas_estudantes_vagas.repository.EmpresaRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -22,18 +21,18 @@ public class VagaController {
     private EmpresaRepo empresaRepo;
     
     @GetMapping
-    public List<Vaga> getAllVagas() {
+    public Iterable<Vaga> getAll() {
         return vagaRepo.findAll();
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Vaga> getVagaById(@PathVariable Long id) {
+    public ResponseEntity<Vaga> getById(@PathVariable Long id) {
         Optional<Vaga> vaga = vagaRepo.findById(id);
-        return vaga.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return vaga.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
     
     @GetMapping("/empresa/{empresaId}")
-    public ResponseEntity<List<Vaga>> getVagasByEmpresa(@PathVariable Long empresaId) {
+    public ResponseEntity<Iterable<Vaga>> getByEmpresa(@PathVariable Long empresaId) {
         Optional<Empresa> empresa = empresaRepo.findById(empresaId);
         if (empresa.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -42,12 +41,12 @@ public class VagaController {
     }
     
     @GetMapping("/status/{status}")
-    public List<Vaga> getVagasByStatus(@PathVariable String status) {
+    public Iterable<Vaga> getByStatus(@PathVariable String status) {
         return vagaRepo.findByStatus(status);
     }
     
     @PostMapping
-    public ResponseEntity<Vaga> createVaga(@RequestBody Vaga vaga) {
+    public ResponseEntity<Vaga> create(@RequestBody Vaga vaga) {
         if (vaga.getEmpresa() == null || vaga.getEmpresa().getId() == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -58,12 +57,11 @@ public class VagaController {
         }
         
         vaga.setEmpresa(empresa.get());
-        Vaga savedVaga = vagaRepo.save(vaga);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedVaga);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vagaRepo.save(vaga));
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Vaga> updateVaga(@PathVariable Long id, @RequestBody Vaga vagaDetails) {
+    public ResponseEntity<Vaga> update(@PathVariable Long id, @RequestBody Vaga vagaDetails) {
         Optional<Vaga> vagaOptional = vagaRepo.findById(id);
         if (vagaOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -77,12 +75,11 @@ public class VagaController {
         vaga.setSalario(vagaDetails.getSalario());
         vaga.setStatus(vagaDetails.getStatus());
         
-        Vaga updatedVaga = vagaRepo.save(vaga);
-        return ResponseEntity.ok(updatedVaga);
+        return ResponseEntity.ok(vagaRepo.save(vaga));
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVaga(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!vagaRepo.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -99,7 +96,6 @@ public class VagaController {
         
         Vaga vaga = vagaOptional.get();
         vaga.setStatus("FECHADA");
-        Vaga updatedVaga = vagaRepo.save(vaga);
-        return ResponseEntity.ok(updatedVaga);
+        return ResponseEntity.ok(vagaRepo.save(vaga));
     }
 }

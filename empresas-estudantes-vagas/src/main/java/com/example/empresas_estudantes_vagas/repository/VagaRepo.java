@@ -1,15 +1,12 @@
-package com.example.empresasestudantesvagas.repository;
+package com.example.empresas_estudantes_vagas.repository;
 
-import com.example.empresasestudantesvagas.model.Vaga;
-import com.example.empresasestudantesvagas.model.Empresa;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import java.util.List;
+import com.example.empresas_estudantes_vagas.model.Vaga;
+import com.example.empresas_estudantes_vagas.model.Empresa;
+import org.springframework.data.repository.CrudRepository;
 
-@Repository
-public interface VagaRepo extends JpaRepository<Vaga, Long> {
-    List<Vaga> findByEmpresa(Empresa empresa);
-    List<Vaga> findByStatus(String status);
-    List<Vaga> findByLocalizacao(String localizacao);
-    List<Vaga> findBySalarioGreaterThanEqual(Double salario);
+public interface VagaRepo extends CrudRepository<Vaga, Long> {
+    Iterable<Vaga> findByEmpresa(Empresa empresa);
+    Iterable<Vaga> findByStatus(String status);
+    Iterable<Vaga> findByLocalizacao(String localizacao);
+    Iterable<Vaga> findBySalarioGreaterThanEqual(Double salario);
 }
