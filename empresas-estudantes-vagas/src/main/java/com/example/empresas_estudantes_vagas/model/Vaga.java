@@ -1,24 +1,43 @@
-package com.example.empresas_estudantes_vagas.model;
+package com.example.empresasestudantesvagas.model;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "vagas")
 public class Vaga {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Column(nullable = false)
     private String titulo;
+    
     private String descricao;
-    private LocalDate publicacao;
-    private Boolean ativo;
-    private Long idEmpresa;
+    private String requisitos;
+    private String localizacao;
+    private Double salario;
+    
+    @Column(nullable = false)
+    private String status = "ABERTA";
+    
+    private LocalDateTime dataCriacao = LocalDateTime.now();
+    
+    @ManyToOne
+    @JoinColumn(name = "empresa_id", nullable = false)
+    private Empresa empresa;
     
     public Vaga() {}
     
-    public Vaga(Long id, String titulo, String descricao, LocalDate publicacao, Boolean ativo, Long idEmpresa) {
-        this.id = id;
+    public Vaga(String titulo, String descricao, String requisitos, 
+                String localizacao, Double salario, Empresa empresa) {
         this.titulo = titulo;
         this.descricao = descricao;
-        this.publicacao = publicacao;
-        this.ativo = ativo;
-        this.idEmpresa = idEmpresa;
+        this.requisitos = requisitos;
+        this.localizacao = localizacao;
+        this.salario = salario;
+        this.empresa = empresa;
     }
     
     // Getters e Setters
@@ -31,12 +50,21 @@ public class Vaga {
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
     
-    public LocalDate getPublicacao() { return publicacao; }
-    public void setPublicacao(LocalDate publicacao) { this.publicacao = publicacao; }
+    public String getRequisitos() { return requisitos; }
+    public void setRequisitos(String requisitos) { this.requisitos = requisitos; }
     
-    public Boolean getAtivo() { return ativo; }
-    public void setAtivo(Boolean ativo) { this.ativo = ativo; }
+    public String getLocalizacao() { return localizacao; }
+    public void setLocalizacao(String localizacao) { this.localizacao = localizacao; }
     
-    public Long getIdEmpresa() { return idEmpresa; }
-    public void setIdEmpresa(Long idEmpresa) { this.idEmpresa = idEmpresa; }
+    public Double getSalario() { return salario; }
+    public void setSalario(Double salario) { this.salario = salario; }
+    
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    
+    public LocalDateTime getDataCriacao() { return dataCriacao; }
+    public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }
+    
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
 }

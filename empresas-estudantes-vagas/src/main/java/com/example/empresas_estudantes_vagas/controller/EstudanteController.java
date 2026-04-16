@@ -1,12 +1,11 @@
-package com.example.empresas_estudantes_vagas.controller;
+package com.example.empresasestudantesvagas.controller;
 
-import com.example.empresas_estudantes_vagas.model.Estudante;
+import com.example.empresasestudantesvagas.model.Estudante;
+import com.example.empresasestudantesvagas.repository.EstudanteRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,62 +13,66 @@ import java.util.Optional;
 @RequestMapping("/api/estudantes")
 public class EstudanteController {
     
-    private List<Estudante> estudantes = new ArrayList<>();
-    private Long nextId = 11L;
-    
-    public EstudanteController() {
-        estudantes.add(new Estudante(1L, "Ana Paula Souza", "ana.souza@email.com", LocalDate.parse("2002-03-15"), 2020));
-        estudantes.add(new Estudante(2L, "Carlos Henrique Lima", "carlos.lima@email.com", LocalDate.parse("2001-10-22"), 2019));
-        estudantes.add(new Estudante(3L, "Fernanda Oliveira", "fernanda.oliveira@email.com", LocalDate.parse("2003-07-05"), 2021));
-        estudantes.add(new Estudante(4L, "Lucas Pereira", "lucas.pereira@email.com", LocalDate.parse("2002-04-11"), 2020));
-        estudantes.add(new Estudante(5L, "Gabriela Martins", "gabriela.martins@email.com", LocalDate.parse("2001-12-25"), 2019));
-        estudantes.add(new Estudante(6L, "Rafael Costa", "rafael.costa@email.com", LocalDate.parse("2000-09-13"), 2018));
-        estudantes.add(new Estudante(7L, "Juliana Silva", "juliana.silva@email.com", LocalDate.parse("2002-06-18"), 2020));
-        estudantes.add(new Estudante(8L, "Marcos Vinícius", "marcos.vinicius@email.com", LocalDate.parse("2003-01-30"), 2021));
-        estudantes.add(new Estudante(9L, "Camila Azevedo", "camila.azevedo@email.com", LocalDate.parse("2001-11-08"), 2019));
-        estudantes.add(new Estudante(10L, "Felipe Cardoso", "felipe.cardoso@email.com", LocalDate.parse("2000-08-27"), 2018));
-    }
+    @Autowired
+    private EstudanteRepo estudanteRepo;
     
     @GetMapping
-    public List<Estudante> getAll() {
-        return estudantes;
+    public List<Estudante> getAllEstudantes() {
+        return estudanteRepo.findAll();
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Estudante> getById(@PathVariable Long id) {
-        Optional<Estudante> estudante = estudantes.stream()
-                .filter(e -> e.getId().equals(id))
-                .findFirst();
-        return estudante.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Estudante> getEstudanteById(@PathVariable Long id) {
+        Optional<Estudante> estudante = estudanteRepo.findById(id);
+        return estudante.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/cpf/{cpf}")
+    public ResponseEntity<Estudante> getEstudanteByCpf(@PathVariable String cpf) {
+        Optional<Estudante> estudante = estudanteRepo.findByCpf(cpf);
+        return estudante.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/curso/{curso}")
+    public List<Estudante> getEstudantesByCurso(@PathVariable String curso) {
+        return estudanteRepo.findByCurso(curso);
     }
     
     @PostMapping
-    public ResponseEntity<Estudante> create(@RequestBody Estudante estudante) {
-        estudante.setId(nextId++);
-        estudantes.add(estudante);
-        return ResponseEntity.status(HttpStatus.CREATED).body(estudante);
+    public ResponseEntity<Estudante> createEstudante(@RequestBody Estudante estudante) {
+        if (estudanteRepo.findByCpf(estudante.getCpf()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        Estudante savedEstudante = estudanteRepo.save(estudante);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedEstudante);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Estudante> update(@PathVariable Long id, @RequestBody Estudante estudanteAtualizado) {
-        Optional<Estudante> estudanteExistente = estudantes.stream()
-                .filter(e -> e.getId().equals(id))
-                .findFirst();
-        
-        if (estudanteExistente.isPresent()) {
-            Estudante estudante = estudanteExistente.get();
-            estudante.setNome(estudanteAtualizado.getNome());
-            estudante.setEmail(estudanteAtualizado.getEmail());
-            estudante.setNascimento(estudanteAtualizado.getNascimento());
-            estudante.setAnoIngresso(estudanteAtualizado.getAnoIngresso());
-            return ResponseEntity.ok(estudante);
+    public ResponseEntity<Estudante> updateEstudante(@PathVariable Long id, @RequestBody Estudante estudanteDetails) {
+        Optional<Estudante> estudanteOptional = estudanteRepo.findById(id);
+        if (estudanteOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        
+        Estudante estudante = estudanteOptional.get();
+        estudante.setNome(estudanteDetails.getNome());
+        estudante.setCpf(estudanteDetails.getCpf());
+        estudante.setEmail(estudanteDetails.getEmail());
+        estudante.setTelefone(estudanteDetails.getTelefone());
+        estudante.setCurso(estudanteDetails.getCurso());
+        estudante.setInstituicao(estudanteDetails.getInstituicao());
+        estudante.setSemestre(estudanteDetails.getSemestre());
+        
+        Estudante updatedEstudante = estudanteRepo.save(estudante);
+        return ResponseEntity.ok(updatedEstudante);
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        boolean removed = estudantes.removeIf(e -> e.getId().equals(id));
-        return removed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteEstudante(@PathVariable Long id) {
+        if (!estudanteRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        estudanteRepo.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

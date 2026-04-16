@@ -1,12 +1,13 @@
-package com.example.empresas_estudantes_vagas.controller;
+package com.example.empresasestudantesvagas.controller;
 
-import com.example.empresas_estudantes_vagas.model.Vaga;
+import com.example.empresasestudantesvagas.model.Vaga;
+import com.example.empresasestudantesvagas.model.Empresa;
+import com.example.empresasestudantesvagas.repository.VagaRepo;
+import com.example.empresasestudantesvagas.repository.EmpresaRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,67 +15,91 @@ import java.util.Optional;
 @RequestMapping("/api/vagas")
 public class VagaController {
     
-    private List<Vaga> vagas = new ArrayList<>();
-    private Long nextId = 8L;
+    @Autowired
+    private VagaRepo vagaRepo;
     
-    public VagaController() {
-        vagas.add(new Vaga(1L, "Desenvolvedor Java", "Atuação em projetos backend com Java e Spring. Experiência desejada em APIs REST.", LocalDate.parse("2025-10-01"), true, 1L));
-        vagas.add(new Vaga(2L, "Analista de Suporte Técnico", "Suporte a clientes, resolução de chamados e participação em treinamentos internos.", LocalDate.parse("2025-09-27"), true, 2L));
-        vagas.add(new Vaga(3L, "Engenheiro de Software", "Desenvolvimento de soluções para sistemas corporativos, integração e automação.", LocalDate.parse("2025-10-03"), false, 3L));
-        vagas.add(new Vaga(4L, "Analista de Dados", "Manipulação e análise de grandes volumes de dados. Conhecimentos de SQL e Python.", LocalDate.parse("2025-09-18"), true, 4L));
-        vagas.add(new Vaga(5L, "Designer Digital", "Criação de materiais gráficos, UX/UI e participação em campanhas de marketing.", LocalDate.parse("2025-09-30"), false, 5L));
-        vagas.add(new Vaga(6L, "Consultor de Projetos", "Elaboração e acompanhamento de projetos empresariais e treinamentos.", LocalDate.parse("2025-10-06"), true, 1L));
-        vagas.add(new Vaga(7L, "Programador Full Stack", "Desenvolvimento de aplicações web frontend e backend com foco em automação.", LocalDate.parse("2025-10-04"), true, 2L));
-    }
+    @Autowired
+    private EmpresaRepo empresaRepo;
     
     @GetMapping
-    public List<Vaga> getAll() {
-        return vagas;
+    public List<Vaga> getAllVagas() {
+        return vagaRepo.findAll();
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Vaga> getById(@PathVariable Long id) {
-        Optional<Vaga> vaga = vagas.stream()
-                .filter(v -> v.getId().equals(id))
-                .findFirst();
-        return vaga.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Vaga> getVagaById(@PathVariable Long id) {
+        Optional<Vaga> vaga = vagaRepo.findById(id);
+        return vaga.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
-    @GetMapping("/empresa/{idEmpresa}")
-    public List<Vaga> getByEmpresa(@PathVariable Long idEmpresa) {
-        return vagas.stream()
-                .filter(v -> v.getIdEmpresa().equals(idEmpresa))
-                .toList();
+    @GetMapping("/empresa/{empresaId}")
+    public ResponseEntity<List<Vaga>> getVagasByEmpresa(@PathVariable Long empresaId) {
+        Optional<Empresa> empresa = empresaRepo.findById(empresaId);
+        if (empresa.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(vagaRepo.findByEmpresa(empresa.get()));
+    }
+    
+    @GetMapping("/status/{status}")
+    public List<Vaga> getVagasByStatus(@PathVariable String status) {
+        return vagaRepo.findByStatus(status);
     }
     
     @PostMapping
-    public ResponseEntity<Vaga> create(@RequestBody Vaga vaga) {
-        vaga.setId(nextId++);
-        vagas.add(vaga);
-        return ResponseEntity.status(HttpStatus.CREATED).body(vaga);
+    public ResponseEntity<Vaga> createVaga(@RequestBody Vaga vaga) {
+        if (vaga.getEmpresa() == null || vaga.getEmpresa().getId() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        Optional<Empresa> empresa = empresaRepo.findById(vaga.getEmpresa().getId());
+        if (empresa.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        vaga.setEmpresa(empresa.get());
+        Vaga savedVaga = vagaRepo.save(vaga);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedVaga);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Vaga> update(@PathVariable Long id, @RequestBody Vaga vagaAtualizada) {
-        Optional<Vaga> vagaExistente = vagas.stream()
-                .filter(v -> v.getId().equals(id))
-                .findFirst();
-        
-        if (vagaExistente.isPresent()) {
-            Vaga vaga = vagaExistente.get();
-            vaga.setTitulo(vagaAtualizada.getTitulo());
-            vaga.setDescricao(vagaAtualizada.getDescricao());
-            vaga.setPublicacao(vagaAtualizada.getPublicacao());
-            vaga.setAtivo(vagaAtualizada.getAtivo());
-            vaga.setIdEmpresa(vagaAtualizada.getIdEmpresa());
-            return ResponseEntity.ok(vaga);
+    public ResponseEntity<Vaga> updateVaga(@PathVariable Long id, @RequestBody Vaga vagaDetails) {
+        Optional<Vaga> vagaOptional = vagaRepo.findById(id);
+        if (vagaOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        
+        Vaga vaga = vagaOptional.get();
+        vaga.setTitulo(vagaDetails.getTitulo());
+        vaga.setDescricao(vagaDetails.getDescricao());
+        vaga.setRequisitos(vagaDetails.getRequisitos());
+        vaga.setLocalizacao(vagaDetails.getLocalizacao());
+        vaga.setSalario(vagaDetails.getSalario());
+        vaga.setStatus(vagaDetails.getStatus());
+        
+        Vaga updatedVaga = vagaRepo.save(vaga);
+        return ResponseEntity.ok(updatedVaga);
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        boolean removed = vagas.removeIf(v -> v.getId().equals(id));
-        return removed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteVaga(@PathVariable Long id) {
+        if (!vagaRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        vagaRepo.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @PatchMapping("/{id}/fechar")
+    public ResponseEntity<Vaga> closeVaga(@PathVariable Long id) {
+        Optional<Vaga> vagaOptional = vagaRepo.findById(id);
+        if (vagaOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Vaga vaga = vagaOptional.get();
+        vaga.setStatus("FECHADA");
+        Vaga updatedVaga = vagaRepo.save(vaga);
+        return ResponseEntity.ok(updatedVaga);
     }
 }

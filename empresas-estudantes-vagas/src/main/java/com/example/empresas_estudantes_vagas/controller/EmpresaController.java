@@ -1,11 +1,11 @@
-package com.example.empresas_estudantes_vagas.controller;
+package com.example.empresasestudantesvagas.controller;
 
-import com.example.empresas_estudantes_vagas.model.Empresa;
+import com.example.empresasestudantesvagas.model.Empresa;
+import com.example.empresasestudantesvagas.repository.EmpresaRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,56 +13,59 @@ import java.util.Optional;
 @RequestMapping("/api/empresas")
 public class EmpresaController {
     
-    private List<Empresa> empresas = new ArrayList<>();
-    private Long nextId = 6L;
-    
-    public EmpresaController() {
-        empresas.add(new Empresa(1L, "Empresa Alfa LTDA", "12.345.678/0001-90", "contato@empresa-alfa.com"));
-        empresas.add(new Empresa(2L, "Beta Comércio ME", "98.765.432/0001-10", "beta@comercio.com"));
-        empresas.add(new Empresa(3L, "Gamma Serviços S.A.", "11.222.333/0001-44", "servicos@gamma.com"));
-        empresas.add(new Empresa(4L, "Delta Engenharia", "22.333.444/0001-55", "contato@deltaeng.com"));
-        empresas.add(new Empresa(5L, "Epsilon Digital", "33.444.555/0001-66", "email@epsilondigital.com"));
-    }
+    @Autowired
+    private EmpresaRepo empresaRepo;
     
     @GetMapping
-    public List<Empresa> getAll() {
-        return empresas;
+    public List<Empresa> getAllEmpresas() {
+        return empresaRepo.findAll();
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Empresa> getById(@PathVariable Long id) {
-        Optional<Empresa> empresa = empresas.stream()
-                .filter(e -> e.getId().equals(id))
-                .findFirst();
-        return empresa.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Empresa> getEmpresaById(@PathVariable Long id) {
+        Optional<Empresa> empresa = empresaRepo.findById(id);
+        return empresa.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/cnpj/{cnpj}")
+    public ResponseEntity<Empresa> getEmpresaByCnpj(@PathVariable String cnpj) {
+        Optional<Empresa> empresa = empresaRepo.findByCnpj(cnpj);
+        return empresa.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     @PostMapping
-    public ResponseEntity<Empresa> create(@RequestBody Empresa empresa) {
-        empresa.setId(nextId++);
-        empresas.add(empresa);
-        return ResponseEntity.status(HttpStatus.CREATED).body(empresa);
+    public ResponseEntity<Empresa> createEmpresa(@RequestBody Empresa empresa) {
+        if (empresaRepo.findByCnpj(empresa.getCnpj()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        Empresa savedEmpresa = empresaRepo.save(empresa);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedEmpresa);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Empresa> update(@PathVariable Long id, @RequestBody Empresa empresaAtualizada) {
-        Optional<Empresa> empresaExistente = empresas.stream()
-                .filter(e -> e.getId().equals(id))
-                .findFirst();
-        
-        if (empresaExistente.isPresent()) {
-            Empresa empresa = empresaExistente.get();
-            empresa.setNome(empresaAtualizada.getNome());
-            empresa.setCnpj(empresaAtualizada.getCnpj());
-            empresa.setEmailContato(empresaAtualizada.getEmailContato());
-            return ResponseEntity.ok(empresa);
+    public ResponseEntity<Empresa> updateEmpresa(@PathVariable Long id, @RequestBody Empresa empresaDetails) {
+        Optional<Empresa> empresaOptional = empresaRepo.findById(id);
+        if (empresaOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        
+        Empresa empresa = empresaOptional.get();
+        empresa.setNome(empresaDetails.getNome());
+        empresa.setCnpj(empresaDetails.getCnpj());
+        empresa.setEmail(empresaDetails.getEmail());
+        empresa.setTelefone(empresaDetails.getTelefone());
+        empresa.setEndereco(empresaDetails.getEndereco());
+        
+        Empresa updatedEmpresa = empresaRepo.save(empresa);
+        return ResponseEntity.ok(updatedEmpresa);
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        boolean removed = empresas.removeIf(e -> e.getId().equals(id));
-        return removed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteEmpresa(@PathVariable Long id) {
+        if (!empresaRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        empresaRepo.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
